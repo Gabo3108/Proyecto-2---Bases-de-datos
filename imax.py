@@ -10,10 +10,9 @@ try:
 except ImportError:
     DateEntry = None
 
-
 ctk.set_appearance_mode("System")
-ctk.set_default_color_theme("blue")
-class AppAgenda(ctk.CTk):
+ctk.set_default_color_theme("green")
+class cinesimax(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Cines imax")
@@ -46,6 +45,6 @@ class AppAgenda(ctk.CTk):
 
         if DateEntry is None:
             self.after(500, lambda: messagebox.showwarning(
-                "Calendario no instalado",
+                "",
                 "Para usar los selectores de fecha instala:\n\npip install tkcalendar"
             ))
