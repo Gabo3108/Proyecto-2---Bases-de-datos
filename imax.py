@@ -211,16 +211,33 @@ class cinesimax(ctk.CTk):
         ctk.CTkButton(form, text="🗑️ Eliminar seleccionado", command=self.eliminar_usuario, fg_color="#b33939", hover_color="#8f2d2d").pack(fill="x", padx=10, pady=5)
 
         # =================== CLIENTES ========================
-        def configurar_pestana_cliente(self):
-            self.crear_encabezado(self.tab_cliente, "Lista de Clientes")      
-            self.entry_idcliente = ctk.CTKEntry(self.tab_cliente, placeholder_text = "ID")
-            self.entry_idcliente.pack(padx = 10, pady = 5)
+    def configurar_pestana_cliente(self):
+        self.crear_encabezado(self.tab_cliente, "Lista de Clientes")      
+        self.entry_idcliente = ctk.CTKEntry(self.tab_cliente, placeholder_text = "ID")
+        self.entry_idcliente.pack(padx = 10, pady = 5)
                 
-            self.entry_nombre = ctk.CTKEntry(self.tab_cliente, placeholder_text = "Nombre")
-            self.entry_nombre.pack(padx = 10, pady = 5)
+        self.entry_nombre = ctk.CTKEntry(self.tab_cliente, placeholder_text = "Nombre")
+        self.entry_nombre.pack(padx = 10, pady = 5)
         
-            self.combo_edad = ctk.CTKComboBox(self.tab_cliente, values = ["Adulto","Niño","Mayor","Estudiante"], state = "readonly")
-            self.combo_edad.pack(padx = 10, pady = 5)
+        self.combo_edad = ctk.CTKComboBox(self.tab_cliente, values = ["Adulto","Niño","Mayor","Estudiante"], state = "readonly")
+        self.combo_edad.pack(padx = 10, pady = 5)
         
-            ctk.CTKButton(self.tab_cliente, text = "Añadir cliente", command = self.agregar_cliente).pack(padx = 10, pady = 10)
+        ctk.CTKButton(self.tab_cliente, text = "Añadir cliente", command = self.agregar_cliente).pack(padx = 10, pady = 10)
+
+    def agregar_cliente(self):
+        id_cliente = self.entry_idcliente.get().strip()
+        nombre = self.entry_nombre.get().strip()
+        grupo_edad = self.entry_edad.get().strip()
+        if not id_cliente or not nombre or not grupo_edad:
+            return messagebox.showwarning("Datos incompletos")
+        try:
+            self.ejecutar_consulta(
+                """
+                INSERT INTO cliente (id_cliente, nombre, grupo_edad)
+                VALUES (%s, %s, %s)"""
+                (id_cliente, nombre, grupo_edad)
+                )
+        except:
+            messagebox.showerror("Error con datos")
+
         
