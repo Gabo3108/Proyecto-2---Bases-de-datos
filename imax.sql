@@ -194,3 +194,9 @@ INSERT INTO contador (id_contador, nombre) VALUES
 INSERT INTO administrador (id_admin, nombre) VALUES
 (501, 'admin1'),
 (502, 'admin2');
+
+
+INSERT INTO pelicula (id_pelicula, titulo, sinopsis, clasificacion, duracion_min, activa) VALUES
+(601, 'Interestelar', 'Un grupo de astronautas viaja a través de un agujero de gusano en busca de un planeta habitable para salvar a la humanidad.', 'PG-13', 169, TRUE),
+(602, 'Avatar: El camino del agua', 'Jake Sully y su familia deben abandonar su hogar y buscar refugio entre los pueblos oceánicos de Pandora.', 'PG-13', 192, TRUE),
+(603, 'Oppenheimer', 'La historia de J. Robert Oppenheimer y su participación en el desarrollo de la bomba atómica durante la Segunda Guerra Mundial.', 'R', 180, TRUE);
