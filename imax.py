@@ -97,3 +97,24 @@ class IMAX(ctk.CTk):
             self.report_text.configure(state='normal')
             self.report_text.delete('1.0', 'end')
             self.report_text.configure(state='deshabilitado')
+
+    def verificar_id_admin(self):
+        valor = self.entrada_admin_id.get().strip()
+        if not valor.isdigit():
+            messagebox.showwarning('Permiso de administrador', 'Introduzca un ID numérico.')
+            return
+        try:
+            filas = self.consultar(
+                'SELECT id_admin FROM administrador WHERE id_admin = %s',
+                (int(valor),)
+            )
+            if not filas:
+                self.bloquear_admin()
+                messagebox.showerror('Acceso denegado', 'No existe un administrador con ese ID.')
+                return
+            self.admin_autorizado_id = int(valor)
+            self.accesos['Administración'] = True
+            self.aviso(f'Edición habilitada para administrador #{valor}.')
+        except Exception as ex:
+            self.bloquear_admin()
+            self.error(ex)
