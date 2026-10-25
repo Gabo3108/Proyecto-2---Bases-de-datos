@@ -269,6 +269,15 @@ class cinesimax(ctk.CTk):
             "Asiento: {self.numero}"
             )
         for dato in datos:
-            ctk.CTklabel(comprobante, text = dato).pack(padx = 10, pady = 5)   
+            ctk.CTklabel(comprobante, text = dato).pack(padx = 10, pady = 5) 
 
-        
+    # -------------------- REFRESCO GENERAL --------------------
+    def actualizar_todas_las_tablas(self):
+        self.cargar_datos_dashboard()
+        self.cargar_datos_cliente()
+        self.cargar_datos_entrada()
+        self.cargar_datos_cartelera()
+
+if __name__ == "__main__":
+    app = cinesimax()
+    app.mainloop()
