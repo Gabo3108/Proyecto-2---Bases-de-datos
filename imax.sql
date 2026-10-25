@@ -220,3 +220,9 @@ FROM sala s
 CROSS JOIN (VALUES ('A'), ('B'), ('C'), ('D')) AS f(fila)
 CROSS JOIN generate_series(1, 5) AS n(numero)
 WHERE s.id_sala IN (1, 2, 3);
+
+
+INSERT INTO funcion (id_funcion, id_pelicula, id_sala, fecha_hora, precio_base, activa, id_admin_creador) VALUES
+(701, 601, 1, '2026-11-05 18:00:00-06', 4500, TRUE, 501),
+(702, 602, 2, '2026-11-05 19:00:00-06', 5000, TRUE, 501),
+(703, 603, 3, '2026-11-06 20:00:00-06', 5500, TRUE, 501);
