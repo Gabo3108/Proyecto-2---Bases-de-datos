@@ -190,3 +190,7 @@ INSERT INTO operador (id_operador, nombre) VALUES
 INSERT INTO contador (id_contador, nombre) VALUES
 (401, 'cont1'),
 (402, 'cont2');
+
+INSERT INTO administrador (id_admin, nombre) VALUES
+(501, 'admin1'),
+(502, 'admin2');
