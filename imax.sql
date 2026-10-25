@@ -79,6 +79,8 @@ CREATE TABLE entrada (
 	asiento INT,
 	id_sala BIGINT,
 	numero_asiento VARCHAR(12),
+	estado VARCHAR(15) NOT NULL DEFAULT 'emitida' CHECK (estado IN ('emitida', 'usada', 'cancelada')),
+	id_compra BIGINT REFERENCES compra(id_compra),
 	CONSTRAINT fk_asiento
 	FOREIGN KEY (id_sala, numero_asiento) REFERENCES asiento(id_sala, numero),
 	dia TIMESTAMP,
