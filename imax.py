@@ -176,3 +176,39 @@ class cinesimax(ctk.CTk):
     def crear_encabezado(self, parent, titulo, descripcion):
         ctk.CTkLabel(parent, text=titulo, font=ctk.CTkFont(size=24, weight="bold")).pack(anchor="w", padx=15, pady=(15, 0))
         ctk.CTkLabel(parent, text=descripcion, font=ctk.CTkFont(size=12)).pack(anchor="w", padx=15, pady=(0, 12))
+
+        # ========= ADMINISTRACIÓN ============
+    def configurar_pestana_dashboard(self):
+        self.crear_encabezado(self.tab_dashboard, "Panel de gestión administrativa")
+
+        cuerpo = ctk.CTkFrame(self.tab_dashboard, fg_color="transparent")
+        cuerpo.pack(fill="both", expand=True, padx=10, pady=5)
+        cuerpo.grid_columnconfigure(0, weight=3)
+        cuerpo.grid_columnconfigure(1, weight=1)
+        cuerpo.grid_rowconfigure(0, weight=1)
+
+        tabla_frame = ctk.CTkFrame(cuerpo)
+        tabla_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
+        form = ctk.CTkScrollableFrame(cuerpo, width=300)
+        form.grid(row=0, column=1, sticky="nsew")
+        self.tree_usuarios = self.crear_treeview(
+            tabla_frame, ("ID", "Función", "Asiento", "Día", "Hora"), (70, 160, 160, 160, 80))
+        self.tree_usuarios.bind("<<TreeviewSelect>>", self.cargar_usuario_seleccionado)
+
+        ctk.CTkLabel(form, text="Entrada a comprar", font=ctk.CTkFont(size=16, weight="bold")).pack(pady=(10, 15))
+        self.entry_nombre = ctk.CTkEntry(form, placeholder_text="Función")
+        self.entry_nombre.pack(fill="x", padx=10, pady=6)
+        self.entry_apellido = ctk.CTkEntry(form, placeholder_text="Asiento")
+        self.entry_apellido.pack(fill="x", padx=10, pady=6)
+
+        self.switch_usuario_activo = ctk.CTkSwitch(form, text="Usuario activo")
+        self.switch_usuario_activo.select()
+        self.switch_usuario_activo.pack(anchor="w", padx=12, pady=10)
+
+        ctk.CTkButton(form, text="➕ Registrar usuario", command=self.agregar_usuario).pack(fill="x", padx=10, pady=(12, 5))
+        ctk.CTkButton(form, text="💾 Actualizar seleccionado", command=self.actualizar_usuario).pack(fill="x", padx=10, pady=5)
+        ctk.CTkButton(form, text="🧹 Nuevo / Limpiar", command=self.limpiar_form_usuario, fg_color="gray").pack(fill="x", padx=10, pady=5)
+        ctk.CTkButton(form, text="🗑️ Eliminar seleccionado", command=self.eliminar_usuario, fg_color="#b33939", hover_color="#8f2d2d").pack(fill="x", padx=10, pady=5)
+
+        # =================== CLIENTES ========================
+        
