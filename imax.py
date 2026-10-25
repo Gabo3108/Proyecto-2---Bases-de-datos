@@ -34,3 +34,20 @@ class IMAX(ctk.CTk):
             "host": os.getenv("DB_HOST", "localhost"),
             "port": os.getenv("DB_PORT", "5432"),
         }
+        self.title('Cines IMAX')
+        self.geometry('1130x785'); self.minsize(900,660)
+        self.funciones={}; self.asientos=[]; self.seleccion=None
+        self.imagenes=[]
+        self.ultimo_tab='Cartelera'
+        self._cambiando_tab=False
+        self.accesos={'Administración': False, 'Reportes': False}
+        self.admin_autorizado_id = None
+        self.reportes_autorizado_id = None
+        barra=ctk.CTkFrame(self); barra.pack(fill='x',padx=14,pady=10)
+        ctk.CTkLabel(barra,text='Cines IMAX',font=ctk.CTkFont(size=22,weight='bold')).pack(side='left',padx=12)
+        ctk.CTkButton(barra,text='Actualizar',width=110,command=self.recargar).pack(side='right',padx=8)
+        self.tabs=ctk.CTkTabview(self); self.tabs.pack(fill='both',expand=True,padx=14,pady=(0,14))
+        self.cart=self.tabs.add('Cartelera'); self.venta=self.tabs.add('Comprar'); self.puerta=self.tabs.add('Validar QR'); self.adm=self.tabs.add('Administración'); self.repor=self.tabs.add('Reportes')
+        self.tabs.configure(command=self.al_cambiar_tab)
+        self.crear_cartelera();self.crear_venta();self.crear_puerta();self.crear_admin();self.crear_reportes()
+        self.after(150,self.recargar)
