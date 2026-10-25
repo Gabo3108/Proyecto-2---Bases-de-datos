@@ -61,3 +61,9 @@ class IMAX(ctk.CTk):
         return False
     def al_cambiar_tab(self):
         self.ultimo_tab = self.tabs.get()
+
+    def establecer_acceso_reportes(self, habilitar):
+            self.boton_generar_reportes.configure(state='normal' if habilitar else 'deshabilitado')
+            self.estado_reportes.configure(text=(
+                f'Reportes habilitados: administrador {self.reportes_autorizado_id}'
+                if habilitar else 'Introduzca un ID de administrador válido para consultar reportes.'))
