@@ -112,3 +112,60 @@ class cinesimax(ctk.CTk):
                         text="Cines IMAX",
                         font=ctk.CTkFont(size=22, weight="bold")
                     ).grid(row=0, column=0, padx=20, pady=(28, 5), sticky="w")
+            ctk.CTkLabel(
+                        self.sidebar_frame,
+                        text="Compra de entradas y gestión administrativa",
+                        font=ctk.CTkFont(size=11),
+                        wraplength=190,
+                        justify="left"
+                    ).grid(row=1, column=0, padx=20, pady=(0, 25), sticky="w")
+            self.botones_nav = {}
+            for i, (nombre, icono) in enumerate([
+                ("Clientes", "👥"),
+                ("Administración", "📋"),
+            ], start=2):
+                    btn = ctk.CTkButton(
+                        self.sidebar_frame, text=f"{icono}  {nombre}",
+                        anchor="w", fg_color="transparent",
+                        command=lambda n=nombre: self.seleccionar_modulo(n)
+                    )
+                    btn.grid(row=i, column=0, padx=15, pady=5, sticky="ew")
+                    self.botones_nav[nombre] = btn
+
+                    ctk.CTkButton(
+                                self.sidebar_frame,
+                                text="🔄  Recargar datos",
+                                command=self.actualizar_todas_las_tablas
+                            ).grid(row=5, column=0, padx=15, pady=(20, 5), sticky="ew")
+                    ctk.CTkLabel(self.sidebar_frame, text="APARIENCIA", font=ctk.CTkFont(size=11, weight="bold")).grid(
+                                row=11, column=0, padx=20, pady=(10, 5), sticky="w"
+                            )
+                    self.option_mode = ctk.CTkOptionMenu(
+                                self.sidebar_frame,
+                                values=["System", "Dark", "Light"],
+                                command=ctk.set_appearance_mode
+                            )
+                    self.option_mode.set("System")
+                    self.option_mode.grid(row=12, column=0, padx=15, pady=(0, 25), sticky="ew")
+
+    def crear_area_principal(self):
+        self.main_container = ctk.CTkFrame(self, fg_color="transparent")
+        self.main_container.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
+        self.main_container.grid_rowconfigure(0, weight=1)
+        self.main_container.grid_columnconfigure(0, weight=1)
+
+        self.tabview = ctk.CTkTabview(self.main_container, command=self.al_cambiar_pestana)
+        self.tabview.grid(row=0, column=0, sticky="nsew")
+
+        self.tab_dashboard = self.tabview.add("Dashboard")
+        self.tab_funciones = self.tabview.add("Cartelera")
+        self.tab_cliente = self.tabview.add("Clientes")
+        self.tab_entrada = self.tabview.add("Entradas")
+
+        self.configurar_pestana_dashboard()
+        self.configurar_pestana_funciones()
+        self.configurar_pestana_cliente()
+        self.configurar_pestana_entrada()
+            
+        
+    
