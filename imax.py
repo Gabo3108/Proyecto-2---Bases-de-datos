@@ -107,8 +107,8 @@ class cinesimax(ctk.CTk):
             self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
             self.sidebar_frame.grid_propagate(False)
             self.sidebar_frame.grid_rowconfigure(10, weight=1)
-        ctk.CTkLabel(
-                    self.sidebar_frame,
-                    text="Cines IMAX",
-                    font=ctk.CTkFont(size=22, weight="bold")
-                ).grid(row=0, column=0, padx=20, pady=(28, 5), sticky="w")
+            ctk.CTkLabel(
+                        self.sidebar_frame,
+                        text="Cines IMAX",
+                        font=ctk.CTkFont(size=22, weight="bold")
+                    ).grid(row=0, column=0, padx=20, pady=(28, 5), sticky="w")
