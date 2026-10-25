@@ -239,5 +239,11 @@ class cinesimax(ctk.CTk):
                 )
         except:
             messagebox.showerror("Error con datos")
+    #===================== COMPRA / ENTRADAS ======================
+    def configurar_pestana_entrada(self):
+        self.crear_encabezado(self.tab_entrada, "Compra de entradas para ver funciones")
+        self.combo_funcion = ctk.CTkComboBox(self.tab_entrada, values =["Seleccione la función que desea ver"],state = "readonly")
+        self.combo_función.pack(padx = 10, pady = 5)
+        self.frame_sala = ctk.CTkFrame(self.tab_entrada)    
 
         
