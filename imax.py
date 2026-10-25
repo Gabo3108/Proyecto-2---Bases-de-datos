@@ -196,7 +196,7 @@ class cinesimax(ctk.CTk):
         form.grid(row=0, column=1, sticky="nsew")
         self.tree_usuarios = self.crear_treeview(
             tabla_frame, ("ID", "Función", "Asiento", "Día", "Hora"), (70, 160, 160, 160, 80))
-        self.tree_usuarios.bind("<<TreeviewSelect>>", self.cargar_usuario_seleccionado)
+        #self.tree_usuarios.bind("<<TreeviewSelect>>", self.cargar_usuario_seleccionado)
 
         ctk.CTkLabel(form, text="Entrada a comprar", font=ctk.CTkFont(size=16, weight="bold")).pack(pady=(10, 15))
         self.entry_nombre = ctk.CTkEntry(form, placeholder_text="Función")
