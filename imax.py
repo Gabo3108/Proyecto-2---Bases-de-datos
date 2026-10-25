@@ -244,6 +244,19 @@ class cinesimax(ctk.CTk):
         self.crear_encabezado(self.tab_entrada, "Compra de entradas para ver funciones")
         self.combo_funcion = ctk.CTkComboBox(self.tab_entrada, values =["Seleccione la función que desea ver"],state = "readonly")
         self.combo_función.pack(padx = 10, pady = 5)
-        self.frame_sala = ctk.CTkFrame(self.tab_entrada)    
+        self.frame_sala = ctk.CTkFrame(self.tab_entrada) 
+
+    
+    '''
+    def compra(self):
+        try:
+            self.ejecutar_consulta(
+                """
+                INSERT INTO entrada (id_entrada, funcion, asiento, dia, hora, tarifa, id_funcion, id_sala)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """
+            )
+    '''
+       
 
         
