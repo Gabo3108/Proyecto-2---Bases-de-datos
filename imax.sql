@@ -171,3 +171,10 @@ CREATE INDEX ix_transaccion_log_fecha ON transaccion_log (ocurrido_en);
 CREATE INDEX ix_asiento_log_fecha ON asiento_auditoria_log (ocurrido_en);
 CREATE INDEX ix_acceso_log_fecha ON acceso_puerta_log (ocurrido_en);
 CREATE INDEX ix_admin_log_fecha ON admin_operacion_audit (ocurrido_en);
+
+INSERT INTO cliente (id_cliente, nombre, grupo_edad) VALUES 
+(101, 'Juan', 'adulto'),
+(102, 'Pedro', 'niño'),
+(103, 'Luis', 'mayor'),
+(104, 'Ana', 'estudiante'),
+(105, 'María', 'adulto');
