@@ -182,3 +182,7 @@ INSERT INTO cliente (id_cliente, nombre, grupo_edad) VALUES
 INSERT INTO taquillero (id_taquillero, nombre) VALUES
 (201, 'taq1'),
 (202, 'taq2');
+
+INSERT INTO operador (id_operador, nombre) VALUES
+(301, 'op1'),
+(302, 'op2');
