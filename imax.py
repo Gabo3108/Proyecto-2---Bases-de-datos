@@ -429,3 +429,28 @@ class IMAX(ctk.CTk):
                     if not motivo and 'estado' in cs:cur.execute("UPDATE entrada SET estado='usada' WHERE id_entrada=%s",(eid,))
             self.aviso('ENTRADA RECHAZADA: '+motivo if motivo else 'ACCESO PERMITIDO. QR marcado como utilizado.')
         except Exception as e:self.error(e)
+
+    def permiso_admin_actual(self):
+        if not self.accesos['Administración'] or self.admin_autorizado_id is None:
+            self.aviso('Verifique un ID de administrador antes de modificar datos.')
+            return False
+        try:
+            registrado = self.consultar('SELECT 1 FROM administrador WHERE id_admin=%s',
+                                        (self.admin_autorizado_id,))
+        except Exception as ex:
+            self.error(ex)
+            return False
+        if not registrado:
+            self.bloquear_admin()
+            messagebox.showerror('Sin acceso', 'El administrador no existe.')
+            return False
+        return True
+
+    def crear_pelicula(self):
+        if not self.permiso_admin_actual(): return
+        try:
+            titulo=self.p_titulo.get().strip();dur=int(self.p_dur.get())
+            if not titulo:raise ValueError('Falta el título.')
+            idp=self.consultar('INSERT INTO pelicula(titulo,sinopsis,clasificacion,duracion_min) VALUES (%s,%s,%s,%s) RETURNING id_pelicula',(titulo,self.p_sinopsis.get(),self.p_clas.get(),dur))[0][0]
+            self.aviso(f'Película creada, ID {idp}');self.recargar()
+        except Exception as e:self.error(e)    
