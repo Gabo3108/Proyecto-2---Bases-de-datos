@@ -172,3 +172,7 @@ class cinesimax(ctk.CTk):
         if nombre in self.botones_nav:
             for modulo, boton in self.botones_nav.items():
                 boton.configure(fg_color=("gray75", "gray25") if modulo == nombre else "transparent")
+
+    def crear_encabezado(self, parent, titulo, descripcion):
+        ctk.CTkLabel(parent, text=titulo, font=ctk.CTkFont(size=24, weight="bold")).pack(anchor="w", padx=15, pady=(15, 0))
+        ctk.CTkLabel(parent, text=descripcion, font=ctk.CTkFont(size=12)).pack(anchor="w", padx=15, pady=(0, 12))
