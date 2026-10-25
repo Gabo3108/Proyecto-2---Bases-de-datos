@@ -67,3 +67,24 @@ class IMAX(ctk.CTk):
             self.estado_reportes.configure(text=(
                 f'Reportes habilitados: administrador {self.reportes_autorizado_id}'
                 if habilitar else 'Introduzca un ID de administrador válido para consultar reportes.'))
+
+    def verificar_id_reportes(self):
+        valor = self.entrada_reportes_id.get().strip()
+        if not valor.isdigit():
+            self.bloquear_reportes()
+            messagebox.showwarning('Permiso de reportes', 'Introduzca un ID numérico.')
+            return
+        try:
+            filas = self.consultar('SELECT id_admin FROM administrador WHERE id_admin = %s',
+                                  (int(valor),))
+            if not filas:
+                self.bloquear_reportes()
+                messagebox.showerror('Acceso denegado', 'No existe un administrador con ese ID.')
+                return
+            self.reportes_autorizado_id = int(valor)
+            self.accesos['Reportes'] = True
+            self.establecer_acceso_reportes(True)
+            self.aviso(f'Reportes habilitados para administrador #{valor}.')
+        except Exception as ex:
+            self.bloquear_reportes()
+            self.error(ex)
