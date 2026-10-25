@@ -482,3 +482,17 @@ class IMAX(ctk.CTk):
                     cur.execute('INSERT INTO funcion(id_pelicula,id_sala,fecha_hora,precio_base) VALUES (%s,%s,%s,%s) RETURNING id_funcion',(idp,ids,fecha,precio));idf=cur.fetchone()[0]
             self.aviso(f'Función creada, ID {idf}');self.recargar()
         except Exception as e:self.error(e)
+
+    def listado_admin(self):
+        try:
+            p=self.consultar('SELECT id_pelicula,titulo FROM pelicula ORDER BY id_pelicula DESC LIMIT 15')
+            s=self.consultar('SELECT id_sala,nombre,ubicacion FROM sala ORDER BY id_sala DESC LIMIT 15')
+            f=self.consultar('SELECT id_funcion,id_pelicula,id_sala,fecha_hora FROM funcion ORDER BY id_funcion DESC LIMIT 20')
+            texto='PELÍCULAS\n'+'\n'.join(map(str,p))+'\n\nSALAS\n'+'\n'.join(map(str,s))+'\n\nFUNCIONES\n'+'\n'.join(map(str,f))
+            self.admin_datos.configure(state='normal')
+            self.admin_datos.delete('1.0','end');self.admin_datos.insert('1.0',texto)
+            self.admin_datos.configure(state='disabled')
+        except Exception as e:
+            self.admin_datos.configure(state='normal')
+            self.admin_datos.delete('1.0','end');self.admin_datos.insert('1.0',formato_error(e))
+            self.admin_datos.configure(state='disabled')
