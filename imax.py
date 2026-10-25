@@ -305,4 +305,38 @@ class IMAX(ctk.CTk):
             vendidos={x[0] for x in cur.fetchall()}
         else: vendidos=set()
         return [(numero,'deshabilitado' if not habilitado else 'vendido' if numero in vendidos else 'bloqueado' if numero in bloqueados else 'disponible') for numero,habilitado in filas]
-=
+    def ver_asientos(self):
+        k=self.funcion_combo.get()
+        if k not in self.funciones:return
+        try:
+            idf,idsala,precio,fecha=self.funciones[k]
+            with self.conexion_transaccional() as db:
+                with db.cursor() as cur: items=self.datos_asiento(cur,idf,idsala)
+            self.asientos=items; libres=[n for n,e in items if e=='disponible'];self.asiento_combo.configure(values=libres or ['Sin asientos disponibles']);self.asiento_combo.set((libres or ['Sin asientos disponibles'])[0])
+            self.dibujar_mapa()
+        except Exception as e:self.error(e)
+
+    def dibujar_mapa(self):
+        items=self.asientos
+        if not items: return
+        filas={}
+        for n,st in items:
+            m=re.match(r'([A-Za-z]+)(\d+)$',n)
+            if m:filas.setdefault(m.group(1),[]).append((int(m.group(2)),n,st))
+        ancho=max(520,max((len(x) for x in filas.values()),default=6)*65+90)
+        alto=max(225,155+max(1,len(filas))*58)
+        im=Image.new('RGB',(ancho,alto),'#182b3c');d=ImageDraw.Draw(im)
+        d.rounded_rectangle((50,20,ancho-50,49),radius=8,fill='#b7d4e4')
+        d.text((ancho//2-27,27),'PANTALLA',fill='#152738')
+        colores = {'disponible': '#26a269', 'vendido': '#c44343',
+                   'bloqueado': '#e6a23c', 'deshabilitado': '#4c4c4c'}
+        for i,(fila,nums) in enumerate(sorted(filas.items())):
+            d.text((20,79+i*58),fila,fill='white')
+            for idx,n,st in sorted(nums):
+                x=58+(idx-1)*65;y=70+i*58
+                color=colores[st]
+                d.rounded_rectangle((x,y,x+53,y+39),radius=6,fill=color)
+                d.text((x+11,y+11),n,fill='white')
+        im.save(BASE/'mapa_asientos_actual.png')
+        foto=ctk.CTkImage(light_image=im,dark_image=im,size=(min(ancho,730),min(alto,540)))
+        self.map_label.configure(image=foto,text='');self.imagen_mapa=foto
