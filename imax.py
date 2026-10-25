@@ -199,3 +199,48 @@ class IMAX(ctk.CTk):
         self.map_label=ctk.CTkLabel(self.map_frame,text='Seleccione una función para ver el mapa')
         self.map_label.pack(padx=8,pady=10)
     
+    def crear_puerta(self):
+        self.encabezado(self.puerta,'Control de puerta — códigos QR de un solo uso')
+        self.qr_input=self.campo(self.puerta,'ID numérico de entrada o código UUID')
+        self.operador_id=self.campo(self.puerta,'ID del operador registrado')
+        ctk.CTkButton(self.puerta,text='Validar entrada',command=self.validar).pack(anchor='w',padx=8,pady=10)
+        ctk.CTkLabel(self.puerta,text='Registra primero un operador en la tabla operador (SQL).',justify='left').pack(anchor='w',padx=8)
+    def crear_admin(self):
+        self.encabezado(self.adm, 'Administración')
+        frame = ctk.CTkScrollableFrame(self.adm)
+        frame.pack(fill='both', expand=True, padx=8, pady=6)
+
+        permiso = ctk.CTkFrame(frame)
+        permiso.pack(fill='x', padx=6, pady=(4, 12))
+        ctk.CTkLabel(permiso, text='ID de administrador para editar:').pack(
+            side='left', padx=(10, 6), pady=10)
+
+        self.entrada_admin_id = ctk.CTkEntry(permiso, width=115, placeholder_text='ID')
+        self.entrada_admin_id.pack(side='left', padx=5)
+        ctk.CTkButton(permiso, text='Verificar ID', width=110,
+                      command=self.verificar_id_admin).pack(side='left', padx=5)
+        self.estado_admin = ctk.CTkLabel(frame, text='')
+        self.estado_admin.pack(anchor='w', padx=10, pady=(0, 8))
+        grid=ctk.CTkFrame(frame,fg_color='transparent');grid.pack(fill='x')
+        p=ctk.CTkFrame(grid);p.grid(row=0,column=0,padx=6,pady=6,sticky='nsew')
+        self.p_titulo=self.campo(p,'Película: título');self.p_sinopsis=self.campo(p,'Sinopsis');self.p_clas=self.campo(p,'Clasificación','TP');self.p_dur=self.campo(p,'Duración (minutos)','120')
+        boton_pelicula=ctk.CTkButton(p,text='Crear película',command=self.crear_pelicula)
+        boton_pelicula.pack(fill='x',padx=8,pady=8)
+        s=ctk.CTkFrame(grid);s.grid(row=0,column=1,padx=6,pady=6,sticky='nsew')
+        self.s_nombre=self.campo(s,'Sala: nombre');self.s_ubi=self.campo(s,'Ubicación');self.s_filas=self.campo(s,'Filas (A, B, C...)','4');self.s_cols=self.campo(s,'Asientos por fila','6')
+        boton_sala=ctk.CTkButton(s,text='Crear sala y asientos',command=self.crear_sala)
+        boton_sala.pack(fill='x',padx=8,pady=8)
+        f=ctk.CTkFrame(grid);f.grid(row=0,column=2,padx=6,pady=6,sticky='nsew')
+        self.f_pelicula=self.campo(f,'ID de película');self.f_sala=self.campo(f,'ID de sala');self.f_fecha=self.campo(f,'Fecha y hora (AAAA-MM-DD HH:MM)','2026-12-01 19:00');self.f_precio=self.campo(f,'Precio base','3500')
+        boton_funcion=ctk.CTkButton(f,text='Crear función',command=self.crear_funcion)
+        boton_funcion.pack(fill='x',padx=8,pady=8)
+        for i in range(3):grid.grid_columnconfigure(i,weight=1)
+        self.campos_admin = [self.p_titulo,self.p_sinopsis,self.p_clas,self.p_dur,
+                             self.s_nombre,self.s_ubi,self.s_filas,self.s_cols,
+                             self.f_pelicula,self.f_sala,self.f_fecha,self.f_precio]
+        self.botones_edicion_admin = [boton_pelicula,boton_sala,boton_funcion]
+        ctk.CTkLabel(frame,text='Consulta de IDs existentes',font=ctk.CTkFont(weight='bold')).pack(anchor='w',padx=8,pady=(16,0))
+        self.admin_datos=ctk.CTkTextbox(frame,height=190)
+        self.admin_datos.pack(fill='x',padx=8,pady=5)
+        self.admin_datos.configure(state='disabled')
+        ctk.CTkButton(frame,text='Actualizar listado',command=self.listado_admin).pack(anchor='w',padx=8,pady=8)
