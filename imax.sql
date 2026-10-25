@@ -178,3 +178,7 @@ INSERT INTO cliente (id_cliente, nombre, grupo_edad) VALUES
 (103, 'Luis', 'mayor'),
 (104, 'Ana', 'estudiante'),
 (105, 'María', 'adulto');
+
+INSERT INTO taquillero (id_taquillero, nombre) VALUES
+(201, 'taq1'),
+(202, 'taq2');
