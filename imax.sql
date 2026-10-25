@@ -75,10 +75,12 @@ CREATE TABLE pago (
 );
 CREATE TABLE entrada (
 	id_entrada INT PRIMARY KEY,
-	funciOn VARCHAR(40),
+	funcion VARCHAR(40),
 	asiento INT,
+	id_sala BIGINT,
+	numero_asiento VARCHAR(12),
 	CONSTRAINT fk_asiento
-	FOREIGN KEY (asiento) REFERENCES asiento(numero),
+	FOREIGN KEY (id_sala, numero_asiento) REFERENCES asiento(id_sala, numero),
 	dia TIMESTAMP,
 	hora TIME,
 	tarifa DECIMAL,
@@ -87,8 +89,7 @@ CREATE TABLE entrada (
 	FOREIGN KEY (id_taquillero) REFERENCES taquillero(id_taquillero), 
 	id_funcion INT,
 	CONSTRAINT fk_funcion
-	FOREIGN KEY (id_funcion) REFERENCES funcion(id_funcion), 
-	id_sala INT, 
+	FOREIGN KEY (id_funcion) REFERENCES funcion(id_funcion),  
 	CONSTRAINT fk_sala
 	FOREIGN KEY (id_sala) REFERENCES sala(id_sala)
 );
