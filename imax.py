@@ -123,3 +123,54 @@ class IMAX(ctk.CTk):
         self.admin_autorizado_id = None
         self.accesos['Administración'] = False
         self.entrada_admin_id.delete(0, 'end')
+
+    def obtener_conexion(self):
+        """Crea una conexión como en tus proyectos anteriores."""
+        conn = psycopg2.connect(**self.conn_params)
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SET search_path TO public;")
+            return conn
+        except Exception:
+            conn.close()
+            raise
+
+    def ejecutar_consulta(self, sql, params=None, fetch=False):
+        conn = None
+        try:
+            conn = self.obtener_conexion()
+            with conn.cursor() as cur:
+                cur.execute(sql, params)
+                resultado = cur.fetchall() if fetch else None
+            conn.commit()
+            return resultado
+        except Exception:
+            if conn is not None:
+                conn.rollback()
+            raise
+        finally:
+            if conn is not None:
+                conn.close()
+
+    def consultar(self, sql, params=None):
+        return self.ejecutar_consulta(sql, params, fetch=True)
+
+    @contextmanager
+    def conexion_transaccional(self):
+
+        conn = self.obtener_conexion()
+        try:
+            yield conn
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+    def error(self,ex): messagebox.showerror('IMAX — Error',formato_error(ex))
+    def aviso(self,txt): messagebox.showinfo('IMAX',txt)
+    def campo(self,parent,titulo,default=''):
+        ctk.CTkLabel(parent,text=titulo).pack(anchor='w',padx=8)
+        e=ctk.CTkEntry(parent);e.pack(fill='x',padx=8,pady=(0,8))
+        if default: e.insert(0,default)
+        return e
