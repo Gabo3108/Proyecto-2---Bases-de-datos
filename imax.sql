@@ -205,3 +205,18 @@ INSERT INTO sala (id_sala, nombre, ubicacion, capacidad)VALUES
 (1, 'Sala IMAX 1', 'San José', 20),
 (2, 'Sala IMAX 2', 'Los Angeles', 20),
 (3, 'Sala IMAX 3', 'Amsterdam', 20);
+
+
+INSERT INTO asiento (id_sala, numero, zona, habilitado)
+SELECT
+    s.id_sala,
+    f.fila || n.numero,
+    CASE
+        WHEN f.fila = 'D' THEN 'VIP'
+        ELSE 'general'
+    END,
+    TRUE
+FROM sala s
+CROSS JOIN (VALUES ('A'), ('B'), ('C'), ('D')) AS f(fila)
+CROSS JOIN generate_series(1, 5) AS n(numero)
+WHERE s.id_sala IN (1, 2, 3);
