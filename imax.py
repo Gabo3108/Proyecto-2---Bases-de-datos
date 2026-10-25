@@ -51,3 +51,13 @@ class IMAX(ctk.CTk):
         self.tabs.configure(command=self.al_cambiar_tab)
         self.crear_cartelera();self.crear_venta();self.crear_puerta();self.crear_admin();self.crear_reportes()
         self.after(150,self.recargar)
+
+            #accesos
+    def requerir_acceso(self, seccion):
+        if self.accesos.get(seccion, False):
+            return True
+        messagebox.showwarning('Acceso restringido',
+            'Verifique un ID de administrador antes de generar reportes.')
+        return False
+    def al_cambiar_tab(self):
+        self.ultimo_tab = self.tabs.get()
