@@ -390,10 +390,42 @@ class IMAX(ctk.CTk):
             else:self.aviso('Pago simulado RECHAZADO. Se liberó el asiento.')
             self.ver_asientos()
         except Exception as e:self.error(e)
-        
+
     def mostrar_boleto(self,codigo,eid,seat,fecha,precio):
         top=ctk.CTkToplevel(self);top.title('Boleto IMAX');top.geometry('390x495')
         ctk.CTkLabel(top,text=f'Entrada #{eid}\nAsiento: {seat}  •  ₡{precio:,.0f}\n{fecha:%d/%m/%Y %H:%M}',font=ctk.CTkFont(size=16,weight='bold')).pack(pady=10)
         im=qrcode.make(codigo).convert('RGB');image=ctk.CTkImage(light_image=im,dark_image=im,size=(250,250))
         label=ctk.CTkLabel(top,text='',image=image);label.pack(pady=8);top.imagen_qr=image
         ctk.CTkLabel(top,text=f'ID numérico para validar: {eid}',font=ctk.CTkFont(size=15,weight='bold')).pack(pady=6)
+
+    def validar(self):
+        try:
+            identificador=self.qr_input.get().strip()
+            if not identificador: raise ValueError('Escribe el ID de entrada o su UUID.')
+            if identificador.isdigit():
+                condicion='e.id_entrada=%s'
+                parametro=int(identificador)
+            else:
+                condicion='c.codigo_qr=%s'
+                parametro=str(uuid.UUID(identificador))
+            operador=int(self.operador_id.get())
+            with self.conexion_transaccional() as db:
+                with db.cursor() as cur:
+                    cur.execute('SELECT 1 FROM operador WHERE id_operador=%s',(operador,))
+                    if not cur.fetchone():raise ValueError('No existe ese operador; regístralo primero en PostgreSQL.')
+                    cur.execute('''SELECT e.id_entrada,e.id_funcion,f.fecha_hora FROM comprobante c JOIN entrada e ON e.id_entrada=c.id_entrada JOIN funcion f ON f.id_funcion=e.id_funcion WHERE '''+condicion+' FOR UPDATE OF e',(parametro,))
+                    v=cur.fetchone()
+                    if not v: raise ValueError('No existe una entrada con ese ID o código QR.')
+                    eid,idf,fecha=v
+                    cur.execute("SELECT 1 FROM acceso_puerta_log WHERE id_entrada=%s AND resultado='exitoso' LIMIT 1",(eid,))
+                    usado=cur.fetchone() is not None
+                    cur.execute("SELECT 1 FROM transaccion_log WHERE tipo_evento='compra_aprobada' AND detalle->>'id_entrada'=%s LIMIT 1",(str(eid),))
+                    aprobado=cur.fetchone() is not None
+                    cur.execute("SELECT NOW() BETWEEN %s - INTERVAL '30 min' AND %s + INTERVAL '15 min'",(fecha,fecha))
+                    horario=cur.fetchone()[0]
+                    motivo='reutilizado' if usado else 'compra sin pago aprobado' if not aprobado else 'fuera de horario' if not horario else None
+                    cur.execute('INSERT INTO acceso_puerta_log(id_entrada,id_operador,dispositivo,resultado,motivo) VALUES (%s,%s,%s,%s,%s)',(eid,operador,'terminal escritorio','rechazado' if motivo else 'exitoso',motivo))
+                    cs=columnas_entrada(cur)
+                    if not motivo and 'estado' in cs:cur.execute("UPDATE entrada SET estado='usada' WHERE id_entrada=%s",(eid,))
+            self.aviso('ENTRADA RECHAZADA: '+motivo if motivo else 'ACCESO PERMITIDO. QR marcado como utilizado.')
+        except Exception as e:self.error(e)
