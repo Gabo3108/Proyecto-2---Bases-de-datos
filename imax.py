@@ -284,3 +284,25 @@ class IMAX(ctk.CTk):
             self.ver_asientos()
             self.listado_admin()
         except Exception as e:self.error(e)
+
+    def ir_a_venta(self,k):self.tabs.set('Comprar');self.funcion_combo.set(k);self.ver_asientos()
+    def registrar_cliente(self):
+        try:
+            nom=self.cli_nombre.get().strip()
+            if not nom:raise ValueError('Escribe el nombre.')
+            r=self.consultar('INSERT INTO cliente(nombre,grupo_edad) VALUES (%s,%s) RETURNING id_cliente',(nom,self.cli_edad.get()))
+            self.cliente_id.delete(0,'end');self.cliente_id.insert(0,str(r[0][0]));self.aviso('Cliente registrado: ID '+str(r[0][0]))
+        except Exception as e:self.error(e)
+    def datos_asiento(self,cur,idf,idsala):
+        cur.execute('''SELECT a.numero,a.habilitado FROM asiento a WHERE a.id_sala=%s ORDER BY a.numero''',(idsala,))
+        filas=cur.fetchall()
+        cur.execute('''SELECT numero_asiento FROM bloqueo_asiento WHERE id_funcion=%s AND id_sala=%s AND estado='activo' AND vence_en>NOW()''',(idf,idsala))
+        bloqueados={x[0] for x in cur.fetchall()}
+        cs=columnas_entrada(cur)
+        if {'id_funcion','id_sala','numero_asiento'} <= cs:
+            filtro="AND estado IN ('emitida','usada')" if 'estado' in cs else ''
+            cur.execute('SELECT numero_asiento FROM entrada WHERE id_funcion=%s AND id_sala=%s '+filtro,(idf,idsala))
+            vendidos={x[0] for x in cur.fetchall()}
+        else: vendidos=set()
+        return [(numero,'deshabilitado' if not habilitado else 'vendido' if numero in vendidos else 'bloqueado' if numero in bloqueados else 'disponible') for numero,habilitado in filas]
+=
