@@ -420,10 +420,7 @@ class IMAX(ctk.CTk):
                     cur.execute("SELECT 1 FROM acceso_puerta_log WHERE id_entrada=%s AND resultado='exitoso' LIMIT 1",(eid,))
                     usado=cur.fetchone() is not None
                     cur.execute("SELECT 1 FROM transaccion_log WHERE tipo_evento='compra_aprobada' AND detalle->>'id_entrada'=%s LIMIT 1",(str(eid),))
-                    aprobado=cur.fetchone() is not None
-                    cur.execute("SELECT NOW() BETWEEN %s - INTERVAL '30 min' AND %s + INTERVAL '15 min'",(fecha,fecha))
-                    horario=cur.fetchone()[0]
-                    motivo='reutilizado' if usado else 'compra sin pago aprobado' if not aprobado else 'fuera de horario' if not horario else None
+                    motivo='reutilizado' if usado else None 
                     cur.execute('INSERT INTO acceso_puerta_log(id_entrada,id_operador,dispositivo,resultado,motivo) VALUES (%s,%s,%s,%s,%s)',(eid,operador,'terminal escritorio','rechazado' if motivo else 'exitoso',motivo))
                     cs=columnas_entrada(cur)
                     if not motivo and 'estado' in cs:cur.execute("UPDATE entrada SET estado='usada' WHERE id_entrada=%s",(eid,))
@@ -496,3 +493,21 @@ class IMAX(ctk.CTk):
             self.admin_datos.configure(state='normal')
             self.admin_datos.delete('1.0','end');self.admin_datos.insert('1.0',formato_error(e))
             self.admin_datos.configure(state='disabled')
+    def reportes(self):
+        if not self.requerir_acceso('Reportes'): return
+        try:
+            if not self.consultar('SELECT 1 FROM administrador WHERE id_admin=%s', (self.reportes_autorizado_id,)):
+                self.bloquear_reportes()
+                raise ValueError('El ID de administrador no existe.')
+            ventas=self.consultar("SELECT estado,COUNT(*),COALESCE(SUM(total),0) FROM compra GROUP BY estado ORDER BY estado")
+            pagos=self.consultar('SELECT metodo,estado,COUNT(*),COALESCE(SUM(monto),0) FROM pago GROUP BY metodo,estado')
+            entradas=self.consultar('SELECT id_funcion,COUNT(*) FROM entrada GROUP BY id_funcion ORDER BY COUNT(*) DESC LIMIT 10')
+            logs=self.consultar('SELECT tipo_evento,COUNT(*) FROM transaccion_log GROUP BY tipo_evento')
+            txt='COMPRAS POR ESTADO\n'+str(ventas)+'\n\nPAGOS\n'+str(pagos)+'\n\nENTRADAS POR FUNCIÓN\n'+str(entradas)+'\n\nEVENTOS DE AUDITORÍA\n'+str(logs)
+            self.report_text.configure(state='normal')
+            self.report_text.delete('1.0','end');self.report_text.insert('1.0',txt)
+            self.report_text.configure(state='disabled')
+        except Exception as e:self.error(e)
+
+if __name__=='__main__':
+    IMAX().mainloop()
