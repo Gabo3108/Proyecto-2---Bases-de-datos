@@ -17,3 +17,9 @@ POSTERS = BASE / 'posters'
 POSTERS.mkdir(exist_ok=True)
 ctk.set_appearance_mode('System')
 ctk.set_default_color_theme('blue')
+
+def columnas_entrada(cur):
+    cur.execute("SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='entrada'")
+    return {r[0] for r in cur.fetchall()}
+def formato_error(ex):
+    return (getattr(ex, 'pgerror', None) or str(ex)).strip()[:950]
