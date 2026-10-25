@@ -118,3 +118,8 @@ class IMAX(ctk.CTk):
         except Exception as ex:
             self.bloquear_admin()
             self.error(ex)
+
+    def bloquear_admin(self):
+        self.admin_autorizado_id = None
+        self.accesos['Administración'] = False
+        self.entrada_admin_id.delete(0, 'end')
