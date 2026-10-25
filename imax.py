@@ -88,3 +88,12 @@ class IMAX(ctk.CTk):
         except Exception as ex:
             self.bloquear_reportes()
             self.error(ex)
+
+    def bloquear_reportes(self):
+            self.reportes_autorizado_id = None
+            self.accesos['Reportes'] = False
+            self.establecer_acceso_reportes(False)
+            self.entrada_reportes_id.delete(0, 'end')
+            self.report_text.configure(state='normal')
+            self.report_text.delete('1.0', 'end')
+            self.report_text.configure(state='deshabilitado')
