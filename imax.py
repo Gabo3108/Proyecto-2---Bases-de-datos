@@ -179,8 +179,11 @@ class cinesimax(ctk.CTk):
 
         # ========= ADMINISTRACIÓN ============
     def configurar_pestana_dashboard(self):
-        self.crear_encabezado(self.tab_dashboard, "Panel de gestión administrativa")
-
+        self.crear_encabezado(
+        self.tab_dashboard,
+        "Panel de gestión administrativa",
+        "Consulta de operaciones y administración del sistema IMAX"
+        )
         cuerpo = ctk.CTkFrame(self.tab_dashboard, fg_color="transparent")
         cuerpo.pack(fill="both", expand=True, padx=10, pady=5)
         cuerpo.grid_columnconfigure(0, weight=3)
