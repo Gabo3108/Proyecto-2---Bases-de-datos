@@ -390,4 +390,10 @@ class IMAX(ctk.CTk):
             else:self.aviso('Pago simulado RECHAZADO. Se liberó el asiento.')
             self.ver_asientos()
         except Exception as e:self.error(e)
- 
+        
+    def mostrar_boleto(self,codigo,eid,seat,fecha,precio):
+        top=ctk.CTkToplevel(self);top.title('Boleto IMAX');top.geometry('390x495')
+        ctk.CTkLabel(top,text=f'Entrada #{eid}\nAsiento: {seat}  •  ₡{precio:,.0f}\n{fecha:%d/%m/%Y %H:%M}',font=ctk.CTkFont(size=16,weight='bold')).pack(pady=10)
+        im=qrcode.make(codigo).convert('RGB');image=ctk.CTkImage(light_image=im,dark_image=im,size=(250,250))
+        label=ctk.CTkLabel(top,text='',image=image);label.pack(pady=8);top.imagen_qr=image
+        ctk.CTkLabel(top,text=f'ID numérico para validar: {eid}',font=ctk.CTkFont(size=15,weight='bold')).pack(pady=6)
