@@ -454,3 +454,31 @@ class IMAX(ctk.CTk):
             idp=self.consultar('INSERT INTO pelicula(titulo,sinopsis,clasificacion,duracion_min) VALUES (%s,%s,%s,%s) RETURNING id_pelicula',(titulo,self.p_sinopsis.get(),self.p_clas.get(),dur))[0][0]
             self.aviso(f'Película creada, ID {idp}');self.recargar()
         except Exception as e:self.error(e)    
+
+    def crear_sala(self):
+        if not self.permiso_admin_actual(): return
+        try:
+            filas=int(self.s_filas.get());cols=int(self.s_cols.get())
+            if not (1<=filas<=26 and 1<=cols<=25):raise ValueError('Usa 1–26 filas y 1–25 columnas.')
+            with self.conexion_transaccional() as db:
+                with db.cursor() as cur:
+                    cur.execute('INSERT INTO sala(nombre,ubicacion,capacidad) VALUES (%s,%s,%s) RETURNING id_sala',(self.s_nombre.get(),self.s_ubi.get(),filas*cols));ids=cur.fetchone()[0]
+                    for f in range(filas):
+                        for c in range(cols):cur.execute('INSERT INTO asiento(id_sala,numero) VALUES (%s,%s)',(ids,f'{chr(65+f)}{c+1}'))
+            self.aviso(f'Sala y asientos creados; ID {ids}');self.recargar()
+        except Exception as e:self.error(e)
+
+    def crear_funcion(self):
+        if not self.permiso_admin_actual(): return
+        try:
+            fecha=datetime.strptime(self.f_fecha.get(),'%Y-%m-%d %H:%M')
+            idp=int(self.f_pelicula.get());ids=int(self.f_sala.get());precio=float(self.f_precio.get())
+            with self.conexion_transaccional() as db:
+                with db.cursor() as cur:
+                    cur.execute('''SELECT 1 FROM funcion f JOIN pelicula p ON p.id_pelicula=f.id_pelicula
+                    WHERE f.id_sala=%s AND f.activa AND tstzrange(f.fecha_hora,f.fecha_hora+make_interval(mins=>p.duracion_min),'[)')
+                    && tstzrange(%s::timestamptz,%s::timestamptz+(SELECT make_interval(mins=>duracion_min) FROM pelicula WHERE id_pelicula=%s),'[)') LIMIT 1''',(ids,fecha,fecha,idp))
+                    if cur.fetchone():raise ValueError('Horario traslapado en esta sala.')
+                    cur.execute('INSERT INTO funcion(id_pelicula,id_sala,fecha_hora,precio_base) VALUES (%s,%s,%s,%s) RETURNING id_funcion',(idp,ids,fecha,precio));idf=cur.fetchone()[0]
+            self.aviso(f'Función creada, ID {idf}');self.recargar()
+        except Exception as e:self.error(e)
