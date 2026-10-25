@@ -340,3 +340,54 @@ class IMAX(ctk.CTk):
         im.save(BASE/'mapa_asientos_actual.png')
         foto=ctk.CTkImage(light_image=im,dark_image=im,size=(min(ancho,730),min(alto,540)))
         self.map_label.configure(image=foto,text='');self.imagen_mapa=foto
+
+    def comprar(self,aprobar):
+        k=self.funcion_combo.get();seat=self.asiento_combo.get()
+        if k not in self.funciones:return self.aviso('Selecciona una función futura.')
+        if not self.cliente_id.get().strip().isdigit():return self.aviso('Registra o indica un ID de cliente.')
+        idf,idsala,precio,fecha=self.funciones[k];cid=int(self.cliente_id.get());qrvalor=None
+        try:
+            with self.conexion_transaccional() as db:
+                with db.cursor() as cur:
+                    # Serializa todas las ventas del mismo asiento en PostgreSQL (incluye procesos distintos).
+                    cur.execute('SELECT pg_advisory_xact_lock(hashtext(%s), hashtext(%s))',(f'imax:{idf}:{idsala}',seat))
+                    cur.execute('SELECT 1 FROM cliente WHERE id_cliente=%s',(cid,))
+                    if not cur.fetchone():raise ValueError('Ese cliente no está registrado.')
+                    disponibles=dict(self.datos_asiento(cur,idf,idsala))
+                    if disponibles.get(seat)!='disponible':raise ValueError('Asiento no disponible; actualiza el mapa.')
+                    cur.execute("UPDATE bloqueo_asiento SET estado='expirado' WHERE id_funcion=%s AND id_sala=%s AND numero_asiento=%s AND estado='activo' AND vence_en<=NOW()",(idf,idsala,seat))
+                    cur.execute('INSERT INTO bloqueo_asiento(id_cliente,id_funcion,id_sala,numero_asiento) VALUES (%s,%s,%s,%s) RETURNING id_bloqueo',(cid,idf,idsala,seat));bloq=cur.fetchone()[0]
+                    cur.execute("INSERT INTO compra(id_cliente,total,estado) VALUES (%s,%s,'pendiente') RETURNING id_compra",(cid,precio));compra=cur.fetchone()[0]
+                    estado='aprobado' if aprobar else 'rechazado'
+                    cur.execute('INSERT INTO pago(id_compra,referencia_externa,metodo,monto,estado) VALUES (%s,%s,%s,%s,%s) RETURNING id_pago',(compra,str(uuid.uuid4()),'simulado',precio,estado));pago=cur.fetchone()[0]
+                    if aprobar:
+                        cs=columnas_entrada(cur)
+                        campos={'id_funcion':idf,'id_sala':idsala,'numero_asiento':seat,'id_compra':compra,'tarifa_aplicada':precio,'estado':'emitida',
+                                'funcion':str(idf),'dia':fecha,'hora':fecha.time(),'tarifa':precio}
+                        if 'asiento' in cs: 
+                            if seat.isdigit():campos['asiento']=int(seat)
+                        if 'id_entrada' in cs:
+                            cur.execute("SELECT is_identity,column_default FROM information_schema.columns WHERE table_schema='public' AND table_name='entrada' AND column_name='id_entrada'")
+                            ident,default=cur.fetchone()
+                            if ident=='NO' and default is None:
+                                cur.execute('SELECT COALESCE(MAX(id_entrada),0)+1 FROM entrada');campos['id_entrada']=cur.fetchone()[0]
+                        requeridos={'id_funcion','id_sala','numero_asiento'}
+                        if not requeridos<=cs:raise ValueError('La tabla entrada no tiene id_funcion/id_sala/numero_asiento. Revisa la estructura cargada.')
+                        seleccion=[c for c in campos if c in cs]
+                        cur.execute('INSERT INTO entrada ('+','.join(seleccion)+') VALUES ('+','.join(['%s']*len(seleccion))+') RETURNING id_entrada',tuple(campos[c] for c in seleccion))
+                        eid=cur.fetchone()[0];qrvalor=str(uuid.uuid4())
+                        cur.execute('INSERT INTO comprobante(id_entrada,codigo_qr) VALUES (%s,%s)',(eid,qrvalor))
+                        cur.execute("UPDATE compra SET estado='pagada' WHERE id_compra=%s",(compra,))
+                        cur.execute("UPDATE bloqueo_asiento SET estado='comprado' WHERE id_bloqueo=%s",(bloq,))
+ 
+                        cur.execute("INSERT INTO transaccion_log(id_compra,id_pago,tipo_evento,detalle) VALUES (%s,%s,'compra_aprobada',jsonb_build_object('id_entrada',%s))",(compra,pago,eid))
+                    else:
+                        cur.execute("UPDATE compra SET estado='fallida' WHERE id_compra=%s",(compra,))
+                        cur.execute("UPDATE bloqueo_asiento SET estado='liberado' WHERE id_bloqueo=%s",(bloq,))
+                        cur.execute("INSERT INTO transaccion_log(id_compra,id_pago,tipo_evento) VALUES (%s,%s,'compra_rechazada')",(compra,pago))
+                    cur.execute('INSERT INTO asiento_auditoria_log(id_funcion,id_sala,numero_asiento,id_cliente,tipo_evento) VALUES (%s,%s,%s,%s,%s)',(idf,idsala,seat,cid,'compra' if aprobar else 'pago_rechazado'))
+            if qrvalor:self.mostrar_boleto(qrvalor,eid,seat,fecha,precio)
+            else:self.aviso('Pago simulado RECHAZADO. Se liberó el asiento.')
+            self.ver_asientos()
+        except Exception as e:self.error(e)
+ 
