@@ -186,3 +186,7 @@ INSERT INTO taquillero (id_taquillero, nombre) VALUES
 INSERT INTO operador (id_operador, nombre) VALUES
 (301, 'op1'),
 (302, 'op2');
+
+INSERT INTO contador (id_contador, nombre) VALUES
+(401, 'cont1'),
+(402, 'cont2');
