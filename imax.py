@@ -257,6 +257,18 @@ class cinesimax(ctk.CTk):
                 """
             )
     '''
-       
+    def comprobante(self):
+        comprobante = ctk.CTkToplevel(self)
+        comprobante.title("Comprobante")
+        comprobante.geometry("400x300")
+    
+        datos = (
+            "Comprobante",
+            "Cliente: {self.id_cliente}",
+            "Función: {self.id_funcion}",
+            "Asiento: {self.numero}"
+            )
+        for dato in datos:
+            ctk.CTklabel(comprobante, text = dato).pack(padx = 10, pady = 5)   
 
         
