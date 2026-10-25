@@ -125,7 +125,6 @@ class IMAX(ctk.CTk):
         self.entrada_admin_id.delete(0, 'end')
 
     def obtener_conexion(self):
-        """Crea una conexión como en tus proyectos anteriores."""
         conn = psycopg2.connect(**self.conn_params)
         try:
             with conn.cursor() as cur:
@@ -174,3 +173,29 @@ class IMAX(ctk.CTk):
         e=ctk.CTkEntry(parent);e.pack(fill='x',padx=8,pady=(0,8))
         if default: e.insert(0,default)
         return e
+
+    def encabezado(self,p,t): ctk.CTkLabel(p,text=t,font=ctk.CTkFont(size=19,weight='bold')).pack(anchor='w',padx=10,pady=9)
+    def crear_cartelera(self):
+        self.encabezado(self.cart,'Cartelera')
+        self.cart_scroll=ctk.CTkScrollableFrame(self.cart)
+        self.cart_scroll.pack(fill='both',expand=True,padx=8,pady=6)
+
+    def crear_venta(self):
+        self.encabezado(self.venta,'Comprar una entrada — un asiento por compra')
+        cuerpo=ctk.CTkFrame(self.venta);cuerpo.pack(fill='both',expand=True,padx=8)
+        left=ctk.CTkScrollableFrame(cuerpo,width=290);left.pack(side='left',fill='y',padx=7,pady=7)
+        self.cli_nombre=self.campo(left,'Nombre del cliente nuevo')
+        self.cli_edad=ctk.CTkOptionMenu(left,values=['adulto','niño','mayor','estudiante']);self.cli_edad.pack(fill='x',padx=8,pady=5)
+        ctk.CTkButton(left,text='Registrar cliente',command=self.registrar_cliente).pack(fill='x',padx=8,pady=7)
+        self.cliente_id=self.campo(left,'ID de cliente registrado')
+        ctk.CTkLabel(left,text='Función').pack(anchor='w',padx=8)
+        self.funcion_combo=ctk.CTkComboBox(left,values=['Sin funciones'],command=lambda _:self.ver_asientos())
+        self.funcion_combo.pack(fill='x',padx=8,pady=7)
+        ctk.CTkLabel(left,text='Asiento').pack(anchor='w',padx=8)
+        self.asiento_combo=ctk.CTkComboBox(left,values=['Sin asientos'],command=lambda _:self.dibujar_mapa());self.asiento_combo.pack(fill='x',padx=8,pady=7)
+        ctk.CTkButton(left,text='Actualizar mapa',command=self.ver_asientos).pack(fill='x',padx=8,pady=5)
+        ctk.CTkButton(left,text='Pagar',command=lambda:self.comprar(True)).pack(fill='x',padx=8,pady=5)
+        self.map_frame=ctk.CTkScrollableFrame(cuerpo);self.map_frame.pack(side='left',fill='both',expand=True,padx=7,pady=7)
+        self.map_label=ctk.CTkLabel(self.map_frame,text='Seleccione una función para ver el mapa')
+        self.map_label.pack(padx=8,pady=10)
+    
