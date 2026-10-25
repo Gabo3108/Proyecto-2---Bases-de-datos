@@ -166,6 +166,9 @@ class cinesimax(ctk.CTk):
         self.configurar_pestana_funciones()
         self.configurar_pestana_cliente()
         self.configurar_pestana_entrada()
-            
-        
-    
+
+    def al_cambiar_pestana(self):
+        nombre = self.tabview.get()
+        if nombre in self.botones_nav:
+            for modulo, boton in self.botones_nav.items():
+                boton.configure(fg_color=("gray75", "gray25") if modulo == nombre else "transparent")
