@@ -244,3 +244,43 @@ class IMAX(ctk.CTk):
         self.admin_datos.pack(fill='x',padx=8,pady=5)
         self.admin_datos.configure(state='disabled')
         ctk.CTkButton(frame,text='Actualizar listado',command=self.listado_admin).pack(anchor='w',padx=8,pady=8)
+
+    def crear_reportes(self):
+        self.encabezado(self.repor, 'Reportes')
+        permiso = ctk.CTkFrame(self.repor)
+        permiso.pack(fill='x', padx=8, pady=7)
+        ctk.CTkLabel(permiso, text='ID de administrador para consultar reportes:').pack(
+            side='left', padx=8, pady=8)
+        self.entrada_reportes_id = ctk.CTkEntry(permiso, width=115, placeholder_text='ID')
+        self.entrada_reportes_id.pack(side='left', padx=5)
+        ctk.CTkButton(permiso, text='Verificar ID',
+                      command=self.verificar_id_reportes).pack(side='left', padx=5)
+        self.estado_reportes = ctk.CTkLabel(self.repor, text='')
+        self.estado_reportes.pack(anchor='w', padx=10, pady=5)
+        self.boton_generar_reportes = ctk.CTkButton(
+            self.repor, text='Generar reportes', command=self.reportes)
+        self.boton_generar_reportes.pack(anchor='w', padx=8, pady=6)
+        self.report_text = ctk.CTkTextbox(self.repor)
+        self.report_text.pack(fill='both', expand=True, padx=8, pady=8)
+        self.report_text.configure(state='disabled')
+        self.establecer_acceso_reportes(False)
+    def recargar(self):
+        try:
+            filas=self.consultar('''SELECT f.id_funcion,p.titulo,p.sinopsis,p.clasificacion,s.nombre,s.ubicacion,
+              f.fecha_hora,f.precio_base,f.id_sala FROM funcion f JOIN pelicula p ON p.id_pelicula=f.id_pelicula
+              JOIN sala s ON s.id_sala=f.id_sala WHERE f.activa AND p.activa AND f.fecha_hora>NOW() ORDER BY f.fecha_hora''')
+            self.funciones={};self.imagenes=[]
+            for w in self.cart_scroll.winfo_children():w.destroy()
+            for idf,titulo,sinopsis,clasi,sala,ubi,fecha,precio,idsala in filas:
+                clave=f'{idf} | {titulo} | {fecha:%d/%m %H:%M}'
+                self.funciones[clave]=(idf,idsala,precio,fecha)
+                bloque=ctk.CTkFrame(self.cart_scroll);bloque.pack(fill='x',padx=8,pady=7)
+                
+                texto=f'{titulo}\n{clasi}  •  {sala}  •  {ubi}\n{fecha:%d/%m/%Y %H:%M}  •  ₡{precio:,.0f}\n{sinopsis[:160]}'
+                ctk.CTkLabel(bloque,text=texto,justify='left',wraplength=620).pack(side='left',padx=8)
+            valores=list(self.funciones) or ['Sin funciones futuras']
+            self.funcion_combo.configure(values=valores);self.funcion_combo.set(valores[0])
+            if not filas:ctk.CTkLabel(self.cart_scroll,text='Aún no hay funciones futuras. Créalas en Administración.').pack(pady=18)
+            self.ver_asientos()
+            self.listado_admin()
+        except Exception as e:self.error(e)
